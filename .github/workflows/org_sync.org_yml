@@ -1,0 +1,41 @@
+me: Sync with jiwon/Data_pj_job
+
+on:
+  push:
+    branches:
+      - main
+    # 주의: main 브랜치로 merge되는 이벤트가 발생할 때만 트리거되도록 설정
+    paths:
+      - '**/*'
+
+jobs:
+  sync-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the sy0218 repository
+      uses: actions/checkout@v2
+      with:
+        repository: sy0218/Data_pj_job
+        token: ${{ secrets.GITHUB_TOKEN }}
+        ref: main
+
+    - name: Set up Git
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+
+    - name: Add jiwon repository as remote
+      run: git remote add jiwon https://github.com/jiwon/Data_pj_job.git
+
+    - name: Fetch the jiwon repository
+      run: git fetch jiwon
+
+    - name: Merge sy0218 main into jiwon main
+      run: git merge origin/main
+
+    - name: Push changes to jiwon repository
+      run: git push jiwon main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
