@@ -82,7 +82,7 @@ if not history_file.exists():
 py, pm, ny, nm = prev_next(year, month)
 
 lines = []
-lines.append("# 📚 Daily Engineering Calendar")
+lines.append("# 📚 Daily Study Calendar")
 lines.append("> One commit a day, one step closer.\n")
 lines.append("---\n")
 lines.append("## 🗓 Current Month")
@@ -112,16 +112,6 @@ for week in cal.monthdayscalendar(year, month):
             else:
                 row.append(link)
     lines.append("| " + " | ".join(row) + " |")
-
-
-# ----------------------
-# 3️⃣ History 링크
-# ----------------------
-lines.append("\n---\n")
-lines.append("## 🗂 History")
-
-for m in range(1, 13):
-    lines.append(f"- 👉 [{year}년 {m}월](history/{ym(year, m)}.md)")
 
 README_PATH.write_text("\n".join(lines), encoding="utf-8")
 
