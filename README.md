@@ -1,4 +1,4 @@
-# 📚 Daily Engineering Calendar
+# 📚 Daily Study Calendar
 > One commit a day, one step closer.
 
 ---
