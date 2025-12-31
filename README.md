@@ -1,4 +1,4 @@
-# 📚 Daily Study Calendar
+# 📚 하루 한 줄 개발 기록
 > One commit a day, one step closer.
 
 ---
