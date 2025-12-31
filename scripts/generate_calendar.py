@@ -11,7 +11,14 @@ HISTORY_DIR.mkdir(exist_ok=True)
 today = datetime.today()
 year = today.year
 month = today.month
+day = today.day
+
 today_str = today.strftime("%Y-%m-%d")
+
+# 📁 날짜별 디렉토리
+YEAR_DIR = BASE_DIR / str(year)
+MONTH_DIR = YEAR_DIR / f"{month:02d}"
+DAY_FILE = MONTH_DIR / f"{today_str}.md"
 
 cal = calendar.Calendar(firstweekday=0)  # Monday start
 
@@ -27,7 +34,29 @@ def prev_next(y, m):
 
 
 # ----------------------
-# 1️⃣ history md 생성
+# 0️⃣ 년 / 월 / 일 디렉토리 & md 생성
+# ----------------------
+MONTH_DIR.mkdir(parents=True, exist_ok=True)
+
+if not DAY_FILE.exists():
+    DAY_FILE.write_text(
+        f"""# 📅 {today_str}
+
+## 🛠 What I did
+- 
+
+## 📘 Learned
+- 
+
+## 📝 Notes
+- 
+""",
+        encoding="utf-8"
+    )
+
+
+# ----------------------
+# 1️⃣ history md 생성 (월 네비게이션)
 # ----------------------
 history_file = HISTORY_DIR / f"{ym(year, month)}.md"
 
@@ -36,16 +65,19 @@ if not history_file.exists():
 
     history_file.write_text(
         f"""# 📆 {year}년 {month}월
-⬅ [{py}.{pm:02d}]({ym(py, pm)}.md) | [{ny}.{nm:02d}]({ym(ny, nm)}.md) ➡
 
-## {today_str}
-- 
+<p align="center">
+<a href="./{ym(py, pm)}.md">⬅ {py}.{pm:02d}</a>
+&nbsp;|&nbsp;
+<a href="./{ym(ny, nm)}.md">{ny}.{nm:02d} ➡</a>
+</p>
 """,
         encoding="utf-8"
     )
 
+
 # ----------------------
-# 2️⃣ README 달력 생성
+# 2️⃣ README 달력 생성 (날짜별 md 링크)
 # ----------------------
 py, pm, ny, nm = prev_next(year, month)
 
@@ -54,28 +86,33 @@ lines.append("# 📚 Daily Engineering Calendar")
 lines.append("> One commit a day, one step closer.\n")
 lines.append("---\n")
 lines.append("## 🗓 Current Month")
-lines.append(f"### 📆 {year}년 {month}월")
+lines.append(f"### 📆 {year}년 {month}월\n")
+
 lines.append(
-    f"⬅ [{py}.{pm:02d}](history/{ym(py, pm)}.md) | "
-    f"[{ny}.{nm:02d}](history/{ym(ny, nm)}.md) ➡\n"
+    f'<p align="center">'
+    f'<a href="history/{ym(py, pm)}.md">⬅ {py}.{pm:02d}</a>'
+    f' &nbsp;|&nbsp; '
+    f'<a href="history/{ym(ny, nm)}.md">{ny}.{nm:02d} ➡</a>'
+    f'</p>\n'
 )
 
 lines.append("| Mon | Tue | Wed | Thu | Fri | Sat | Sun |")
-lines.append("|-----|-----|-----|-----|-----|-----|-----|")
+lines.append("|----|----|----|----|----|----|----|")
 
 for week in cal.monthdayscalendar(year, month):
     row = []
-    for day in week:
-        if day == 0:
+    for d in week:
+        if d == 0:
             row.append(" ")
         else:
-            date_anchor = f"{year}-{month:02d}-{day:02d}"
-            link = f"[{day}](history/{ym(year, month)}.md#{date_anchor})"
-            if date_anchor == today_str:
+            date_str = f"{year}-{month:02d}-{d:02d}"
+            link = f"[{d}]({year}/{month:02d}/{date_str}.md)"
+            if date_str == today_str:
                 row.append(f"**{link} 🔥**")
             else:
                 row.append(link)
     lines.append("| " + " | ".join(row) + " |")
+
 
 # ----------------------
 # 3️⃣ History 링크
@@ -88,4 +125,4 @@ for m in range(1, 13):
 
 README_PATH.write_text("\n".join(lines), encoding="utf-8")
 
-print("✅ Calendar & README generated")
+print("✅ Calendar, README, Year/Month/Day structure generated")
