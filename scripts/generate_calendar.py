@@ -2,6 +2,9 @@ import calendar
 from datetime import datetime
 from pathlib import Path
 
+# ----------------------
+# 기본 경로 설정
+# ----------------------
 BASE_DIR = Path(__file__).resolve().parents[1]
 HISTORY_DIR = BASE_DIR / "history"
 README_PATH = BASE_DIR / "README.md"
@@ -9,32 +12,50 @@ README_PATH = BASE_DIR / "README.md"
 HISTORY_DIR.mkdir(exist_ok=True)
 
 today = datetime.today()
-year = today.year
-month = today.month
-day = today.day
-
+year, month, day = today.year, today.month, today.day
 today_str = today.strftime("%Y-%m-%d")
 
-# 📁 날짜별 디렉토리
+# 날짜별 경로
 YEAR_DIR = BASE_DIR / str(year)
 MONTH_DIR = YEAR_DIR / f"{month:02d}"
 DAY_FILE = MONTH_DIR / f"{today_str}.md"
 
-cal = calendar.Calendar(firstweekday=0)  # Monday start
-
-
+# ----------------------
+# 유틸 함수
+# ----------------------
 def ym(y, m):
     return f"{y}-{m:02d}"
-
 
 def prev_next(y, m):
     prev_y, prev_m = (y - 1, 12) if m == 1 else (y, m - 1)
     next_y, next_m = (y + 1, 1) if m == 12 else (y, m + 1)
     return prev_y, prev_m, next_y, next_m
 
+def render_month_calendar(year, month, today_str=None):
+    cal = calendar.Calendar(firstweekday=0)
+
+    lines = []
+    lines.append("| Mon | Tue | Wed | Thu | Fri | Sat | Sun |")
+    lines.append("|----|----|----|----|----|----|----|")
+
+    for week in cal.monthdayscalendar(year, month):
+        row = []
+        for d in week:
+            if d == 0:
+                row.append(" ")
+            else:
+                date_str = f"{year}-{month:02d}-{d:02d}"
+                link = f"[{d}]({year}/{month:02d}/{date_str}.md)"
+                if today_str and date_str == today_str:
+                    row.append(f"**{link} 🔥**")
+                else:
+                    row.append(link)
+        lines.append("| " + " | ".join(row) + " |")
+
+    return "\n".join(lines)
 
 # ----------------------
-# 0️⃣ 년 / 월 / 일 디렉토리 & md 생성
+# 0️⃣ 연/월 디렉토리 & 일별 md 생성
 # ----------------------
 MONTH_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -42,7 +63,7 @@ if not DAY_FILE.exists():
     DAY_FILE.write_text(
         f"""# 📅 {today_str}
 
-## 🛠 프로그래밍 ( 알고리즘 )
+## 🛠 프로그래밍 (알고리즘)
 - 
 
 ## 📘 실습
@@ -54,14 +75,15 @@ if not DAY_FILE.exists():
         encoding="utf-8"
     )
 
-
 # ----------------------
-# 1️⃣ history md 생성 (월 네비게이션)
+# 1️⃣ history/YYYY-MM.md 생성 (월 네비 + 달력)
 # ----------------------
 history_file = HISTORY_DIR / f"{ym(year, month)}.md"
 
 if not history_file.exists():
     py, pm, ny, nm = prev_next(year, month)
+
+    calendar_md = render_month_calendar(year, month)
 
     history_file.write_text(
         f"""# 📆 {year}년 {month}월
@@ -71,13 +93,14 @@ if not history_file.exists():
 &nbsp;|&nbsp;
 <a href="./{ym(ny, nm)}.md">{ny}.{nm:02d} ➡</a>
 </p>
+
+{calendar_md}
 """,
         encoding="utf-8"
     )
 
-
 # ----------------------
-# 2️⃣ README 달력 생성 (날짜별 md 링크)
+# 2️⃣ README.md 생성 (월 네비 + 🔥 달력)
 # ----------------------
 py, pm, ny, nm = prev_next(year, month)
 
@@ -96,23 +119,8 @@ lines.append(
     f'</p>\n'
 )
 
-lines.append("| Mon | Tue | Wed | Thu | Fri | Sat | Sun |")
-lines.append("|----|----|----|----|----|----|----|")
-
-for week in cal.monthdayscalendar(year, month):
-    row = []
-    for d in week:
-        if d == 0:
-            row.append(" ")
-        else:
-            date_str = f"{year}-{month:02d}-{d:02d}"
-            link = f"[{d}]({year}/{month:02d}/{date_str}.md)"
-            if date_str == today_str:
-                row.append(f"**{link} 🔥**")
-            else:
-                row.append(link)
-    lines.append("| " + " | ".join(row) + " |")
+lines.append(render_month_calendar(year, month, today_str))
 
 README_PATH.write_text("\n".join(lines), encoding="utf-8")
 
-print("✅ Calendar, README, Year/Month/Day structure generated")
+print("✅ README, history, Year/Month/Day 구조 생성 완료")
