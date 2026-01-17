@@ -31,8 +31,10 @@ def prev_next(y, m):
     next_y, next_m = (y + 1, 1) if m == 12 else (y, m + 1)
     return prev_y, prev_m, next_y, next_m
 
-def render_month_calendar(year, month, today_str=None):
+def render_month_calendar(year, month, today_str=None, base_path=""):
     cal = calendar.Calendar(firstweekday=0)
+
+    prefix = f"{base_path}/" if base_path else ""
 
     lines = []
     lines.append("| Mon | Tue | Wed | Thu | Fri | Sat | Sun |")
@@ -45,7 +47,7 @@ def render_month_calendar(year, month, today_str=None):
                 row.append(" ")
             else:
                 date_str = f"{year}-{month:02d}-{d:02d}"
-                link = f"[{d}]({year}/{month:02d}/{date_str}.md)"
+                link = f"[{d}]({prefix}{year}/{month:02d}/{date_str}.md)"
                 if today_str and date_str == today_str:
                     row.append(f"**{link} 🔥**")
                 else:
